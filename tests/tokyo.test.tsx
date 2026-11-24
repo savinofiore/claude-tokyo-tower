@@ -1,8 +1,9 @@
 import { expect, test } from 'claude-code/testing'
 
-import { levelFromPercent, MAX_LEVEL } from '../hooks/pixels'
-import { buildScene } from '../hooks/scene'
-import { TOWER_LIT } from '../hooks/tower'
+import { buildScene as buildCinematic } from '../hooks/cinematic/scene'
+import { TOWER_LIT } from '../hooks/cinematic/tower'
+import { levelFromPercent, MAX_LEVEL } from '../hooks/level'
+import { buildScene as buildPixel } from '../hooks/pixel/scene'
 
 const BACKDROP = {
   plugin: 'tokyo-tower',
@@ -10,6 +11,8 @@ const BACKDROP = {
   surface: 'desktop',
   props: { scene: 'tokyo-night', plugin: 'tokyo-tower', glass: false },
 } as const
+
+const STYLES = ['cinematic', 'pixel'] as const
 
 const fill = (percent: number | undefined) => ({
   context: { window: 200_000, percent, tokens: percent === undefined ? undefined : percent * 2_000 },
@@ -25,29 +28,57 @@ test('the glow fades as the context fills, dark at 80%', async () => {
   expect(levelFromPercent(100)).toBe(0)
 })
 
-test('every scene fits the Svg limit and holds no refused markup', async () => {
-  for (let level = 0; level <= MAX_LEVEL; level++) {
-    const svg = buildScene(level)
-    expect(svg.length < 131_072).toBe(true)
-    expect(/<image|href|<!--|CDATA/.test(svg)).toBe(false)
+test('every scene of both styles fits the Svg limit and holds no refused markup', async () => {
+  for (const build of [buildCinematic, buildPixel]) {
+    for (let level = 0; level <= MAX_LEVEL; level++) {
+      const svg = build(level)
+      expect(svg.length < 131_072).toBe(true)
+      expect(/<image|href|<!--|CDATA/.test(svg)).toBe(false)
+    }
   }
 })
 
-test('the tower goes dark as the context fills and relights after a compaction', async ($, on) => {
+for (const style of STYLES) {
+  test(`${style}: the tower goes dark as the context fills and relights after a compaction`, { options: { style } }, async ($, on) => {
+    on('session.measure', (_, e) => ({ changed: e.changed }))
+    const towerIsLit = async () => {
+      const ui = await $.ui.mount(BACKDROP)
+      const svg = await ui.find({ type: 'Svg' })
+      await ui.unmount()
+
+      return String(svg?.props.source).includes(TOWER_LIT)
+    }
+
+    expect(await towerIsLit()).toBe(true)
+    await $.session.measure(fill(80))
+    expect(await towerIsLit()).toBe(false)
+    await $.session.measure(fill(undefined))
+    expect(await towerIsLit()).toBe(true)
+  })
+}
+
+test('cinematic, the default, plays under the film shader fed the glow', async ($, on) => {
   on('session.measure', (_, e) => ({ changed: e.changed }))
-  const towerIsLit = async () => {
-    const ui = await $.ui.mount(BACKDROP)
-    const svg = await ui.find({ type: 'Svg' })
-    await ui.unmount()
+  await $.session.measure(fill(40))
+  const ui = await $.ui.mount(BACKDROP)
+  const shader = await ui.find({ type: 'Shader' })
+  const svg = await ui.find({ type: 'Svg' })
+  await ui.unmount()
 
-    return String(svg?.props.source).includes(TOWER_LIT)
-  }
+  expect(shader?.props.module).toBe('hooks/cinematic/cinema.ts')
+  expect(shader?.props.values).toEqual({ glow: 0.5 })
+  expect(String(svg?.props.source).includes('crispEdges')).toBe(false)
+})
 
-  expect(await towerIsLit()).toBe(true)
-  await $.session.measure(fill(80))
-  expect(await towerIsLit()).toBe(false)
-  await $.session.measure(fill(undefined))
-  expect(await towerIsLit()).toBe(true)
+test('pixel draws the pixel-art scene alone, with no shader', { options: { style: 'pixel' } }, async $ => {
+  const ui = await $.ui.mount(BACKDROP)
+  const shader = await ui.find({ type: 'Shader' })
+  const svg = await ui.find({ type: 'Svg' })
+  await ui.unmount()
+
+  expect(shader === undefined).toBe(true)
+  expect(String(svg?.props.source).includes('crispEdges')).toBe(true)
+  expect(String(svg?.props.alt)).toContain('Pixel-art')
 })
 
 test('a level the earlier, non-inverted version stored is declined', async ($, on) => {

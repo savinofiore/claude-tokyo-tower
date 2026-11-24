@@ -1,11 +1,33 @@
 {
   "name": "tokyo-tower",
-  "version": "1.0.1",
-  "description": "A pixel-art Tokyo night behind your Claude Code chat: Tokyo Tower shines bright on a fresh context and dims as the context window fills up",
-  "author": { "name": "savinofiore", "url": "https://github.com/savinofiore" },
+  "version": "1.1.0",
+  "description": "A Tokyo night behind your Claude Code chat, cinematic or pixel-art: Tokyo Tower shines bright on a fresh context and dims as the context window fills up",
+  "author": {
+    "name": "savinofiore",
+    "url": "https://github.com/savinofiore"
+  },
   "homepage": "https://github.com/savinofiore/claude-tokyo-tower",
   "repository": "https://github.com/savinofiore/claude-tokyo-tower",
   "license": "MIT",
-  "keywords": ["theme", "pixel-art", "tokyo", "context-window", "backdrop"],
-  "types": "./types/index.d.ts"
+  "keywords": [
+    "theme",
+    "cinematic",
+    "pixel-art",
+    "tokyo",
+    "context-window",
+    "backdrop"
+  ],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "style": {
+      "type": "string",
+      "title": "Style",
+      "description": "cinematic: smooth vector city with a GPU film pass (bloom, haze, grain). pixel: the original pixel-art scene.",
+      "default": "cinematic",
+      "options": [
+        "cinematic",
+        "pixel"
+      ]
+    }
+  }
 }

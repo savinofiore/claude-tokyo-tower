@@ -1,12 +1,14 @@
 # Tokyo Tower — a context-aware theme for Claude Code
 
-A pixel-art Tokyo night behind your Claude Code chat. Tokyo Tower shines bright when the
+A Tokyo night behind your Claude Code chat, in the style you pick at install: cinematic or
+pixel-art. Tokyo Tower shines bright when the
 conversation starts and slowly goes dark as the context window fills up, so you can tell
 at a glance how much room is left.
 
-| Fresh context | Half full | Nearly full |
-| --- | --- | --- |
-| ![Tokyo Tower fully lit](assets/fresh.png) | ![Tokyo Tower half lit](assets/half.png) | ![Tokyo Tower dark](assets/full.png) |
+| Style | Fresh context | Half full | Nearly full |
+| --- | --- | --- | --- |
+| Cinematic | ![Tokyo Tower fully lit, cinematic](assets/fresh.png) | ![Tokyo Tower half lit, cinematic](assets/half.png) | ![Tokyo Tower dark, cinematic](assets/full.png) |
+| Pixel | ![Tokyo Tower fully lit, pixel-art](assets/pixel-fresh.png) | ![Tokyo Tower half lit, pixel-art](assets/pixel-half.png) | ![Tokyo Tower dark, pixel-art](assets/pixel-full.png) |
 
 ## What changes with the context
 
@@ -25,8 +27,23 @@ Always there: the moon, Mount Fuji on the horizon, a commuter train crossing eve
 36 seconds, and slow red aviation lights. Motion is slow and never flashes; with reduced
 motion turned on, the scene holds still in a finished pose.
 
-The theme is dark only. Your own messages get square bubbles with an orange outline and a
-hard pixel shadow.
+## Styles
+
+- **cinematic** (the default): smooth vector art, sharp at any resolution. In the desktop app a
+  GPU shader plays over it for a filmed look: bloom around every light, a slow haze lit by the
+  city, a hint of lens fringing at the edges, a vignette and a fixed film grain. Where shaders
+  don't play (the mobile apps, Reduce Motion, a slow GPU) the same scene shows without the film
+  pass. Your own messages get rounded bubbles with an orange outline and a soft shadow.
+- **pixel**: the original pixel-art scene, with square bubbles and a hard pixel shadow.
+
+Install asks which one you want. To switch later, change **Style** under the plugin's options
+in `/config`, or set it in `~/.claude/settings.json`:
+
+```json
+"pluginConfigs": { "tokyo-tower@claude-tokyo-tower": { "options": { "style": "pixel" } } }
+```
+
+Both are dark only.
 
 ## Install
 
@@ -59,12 +76,47 @@ claude plugin uninstall tokyo-tower
 The backdrop is drawn by the Claude desktop and mobile apps. The terminal and editor
 integrations draw no themes, so there the plugin does nothing.
 
+## Warp terminal
+
+The `warp/` folder holds a Warp theme with the same palette and the scene as its
+background, in both styles (`warp/cinematic/` and `warp/pixel/`), rendered at 3840×2160 at
+every light level (`tokyo_tower_<build>_0.png` dark to `_10.png` fully lit). Copy the style
+you want (here `cinematic`):
+
+```bash
+mkdir -p ~/.warp/themes && rm -f ~/.warp/themes/tokyo_tower* && cp warp/cinematic/tokyo_tower* ~/.warp/themes/
+```
+
+Then pick **Tokyo Tower** in Warp under Settings → Appearance → Themes (turn off "Sync with
+OS", or set it as the dark theme).
+
+To make the city dim with the context, as in the desktop app, use the bundled status line.
+On every refresh it points the theme at the image for the current light level, and Warp
+reloads the theme by itself. The lights count tokens against a 200k scale (dark at 160k
+tokens), so they still move with 1M-token models. It only touches the theme from sessions running in Warp, and
+needs `jq`:
+
+```bash
+cp warp/tokyo-tower-statusline.sh ~/.claude/
+```
+
+and in `~/.claude/settings.json`:
+
+```json
+"statusLine": { "type": "command", "command": "~/.claude/tokyo-tower-statusline.sh", "padding": 0 }
+```
+
+The Warp theme is shared by all windows, so with several Claude sessions open it follows
+whichever refreshed last. To regenerate the images after changing the scene, run
+`bun scripts/build-warp-theme.ts` (needs ImageMagick and Google Chrome); it rebuilds both styles.
+
 ## Development
 
 The plugin is a hooks module (`hooks/register.tsx`) that sets the look at
 `session.start`, reads the context fill from `session.measure`, and draws the scene as an
-SVG in a `Backdrop` render hook. The scene is generated in `hooks/scene.ts`, `sky.ts`,
-`city.ts` and `tower.ts`.
+SVG in a `Backdrop` render hook. `hooks/styles.ts` picks the style from the plugin's options.
+Each style has its own folder, `hooks/cinematic/` (with the film shader, `cinema.ts`) and
+`hooks/pixel/`, each building its scene in `scene.ts`, `sky.ts`, `city.ts` and `tower.ts`.
 
 ```bash
 claude plugin validate .

@@ -1,9 +1,9 @@
 import { atom, read, update } from 'claude-code'
-import type { Register, StateDollar, ThemeSetArgs, ThemeStyle } from 'claude-code'
+import type { Register, StateDollar, ThemeSetArgs } from 'claude-code'
 
 import { makeColors } from './make-colors.js'
-import { levelFromPercent, MAX_LEVEL } from './pixels'
-import { buildScene } from './scene'
+import { glowOf, levelFromPercent, MAX_LEVEL } from './level'
+import { styleFrom } from './styles'
 
 const SCENE = 'tokyo-night'
 // The tag declines a level stored by the earlier version, whose scale ran the other way.
@@ -34,21 +34,9 @@ const LOOK: ThemeSetArgs = {
   backdrop: { scene: SCENE, glass: { blur: 14, tint: '#13163e', opacity: 0.4 } },
 }
 
-// Square bubbles with a hard pixel shadow.
-const STYLE: ThemeStyle = {
-  UserMessage: {
-    radius: 0,
-    backgroundColor: '#1c1f4a',
-    borderColor: '#ff7a2f',
-    borderWidth: 2,
-    shadow: { x: 3, y: 3, blur: 0, color: '#05061a' },
-  },
-  ToolUse: { radius: 0, backgroundColor: '#11143a' },
-}
-
 const scenes = new Map<number, string>()
 
-const sceneFor = (level: number) => {
+const sceneFor = (buildScene: (level: number) => string, level: number) => {
   const cached = scenes.get(level)
   if (cached !== undefined) return cached
   const svg = buildScene(level)
@@ -63,11 +51,14 @@ const syncGlow = async ($: StateDollar, percent: number | undefined) => {
   await update($, glow, () => level)
 }
 
-export const register: Register = on => {
+// A change of style in the config menu reloads the module, so the scene cache holds one style.
+export const register: Register = (on, options) => {
+  const look = styleFrom(options)
+
   on('session.start', async ($, e, next) => {
     const unpainted = problems.find(line => line.startsWith("Desktop won't paint"))
     if (unpainted !== undefined) $.ui.toast(unpainted)
-    const set = await $.theme.set({ ...LOOK, style: STYLE }).catch(error => {
+    const set = await $.theme.set({ ...LOOK, style: look.chat }).catch(error => {
       $.ui.log(String(error))
 
       return $.theme.set(LOOK)
@@ -86,10 +77,17 @@ export const register: Register = on => {
   on('ui.render', { component: 'Backdrop' }, async ($, e, next) => {
     if (e.surface !== 'desktop' && e.surface !== 'mobile') return next(e)
     if (e.props.scene !== SCENE) return next(e)
-    const { Svg } = $.ui.resolve(e)
+    const { Shader, Svg } = $.ui.resolve(e)
     const level = await read($, glow)
-    const alt = `Pixel-art Tokyo at night, Tokyo Tower lit at ${Math.round((level / MAX_LEVEL) * 100)}%`
+    const alt = `${look.picture}, Tokyo Tower lit at ${Math.round(glowOf(level) * 100)}%`
+    const scene = <Svg source={sceneFor(look.buildScene, level)} alt={alt} isInteractive />
+    if (look.name === 'pixel') return scene
 
-    return <Svg source={sceneFor(level)} alt={alt} isInteractive />
+    // The Svg is the whole scene on its own; the shader adds the film look where the app plays it.
+    return (
+      <Shader module="./cinematic/cinema.ts" values={{ glow: glowOf(level) }}>
+        {scene}
+      </Shader>
+    )
   })
 }
