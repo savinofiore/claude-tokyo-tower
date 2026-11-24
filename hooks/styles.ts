@@ -10,9 +10,11 @@ export type SceneStyle = {
   // How the alt text names the picture.
   picture: string
   chat: ThemeStyle
+  // Whether the GPU film pass plays over the scene (cinematic only).
+  hasFilm: boolean
 }
 
-const CINEMATIC: SceneStyle = {
+const CINEMATIC: Omit<SceneStyle, 'hasFilm'> = {
   name: 'cinematic',
   buildScene: buildCinematic,
   picture: 'Tokyo at night',
@@ -23,7 +25,7 @@ const CINEMATIC: SceneStyle = {
   },
 }
 
-const PIXEL: SceneStyle = {
+const PIXEL: Omit<SceneStyle, 'hasFilm'> = {
   name: 'pixel',
   buildScene: buildPixel,
   picture: 'Pixel-art Tokyo at night',
@@ -34,4 +36,5 @@ const PIXEL: SceneStyle = {
   },
 }
 
-export const styleFrom = (options: PluginOptions): SceneStyle => (options.style === 'pixel' ? PIXEL : CINEMATIC)
+export const styleFrom = (options: PluginOptions): SceneStyle =>
+  options.style === 'pixel' ? { ...PIXEL, hasFilm: false } : { ...CINEMATIC, hasFilm: options.film !== false }
