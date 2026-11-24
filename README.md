@@ -73,6 +73,11 @@ claude plugin test .
 
 To try local changes, start Claude Code with `claude --plugin-dir <this folder>`.
 
+## Contributing and security
+
+Pull requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). To report a
+vulnerability privately, see [SECURITY.md](SECURITY.md).
+
 ## License
 
 MIT
