@@ -1,0 +1,12 @@
+{
+  "name": "claude-tokyo-tower",
+  "owner": { "name": "savinofiore" },
+  "description": "Tokyo Tower, a context-aware pixel-art theme for Claude Code",
+  "plugins": [
+    {
+      "name": "tokyo-tower",
+      "source": "./",
+      "description": "Pixel-art Tokyo night theme: Tokyo Tower dims as the context window fills up"
+    }
+  ]
+}

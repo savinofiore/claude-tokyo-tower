@@ -1,0 +1,11 @@
+{
+  "name": "tokyo-tower",
+  "version": "1.0.0",
+  "description": "A pixel-art Tokyo night behind your Claude Code chat: Tokyo Tower shines bright on a fresh context and dims as the context window fills up",
+  "author": { "name": "savinofiore", "url": "https://github.com/savinofiore" },
+  "homepage": "https://github.com/savinofiore/claude-tokyo-tower",
+  "repository": "https://github.com/savinofiore/claude-tokyo-tower",
+  "license": "MIT",
+  "keywords": ["theme", "pixel-art", "tokyo", "context-window", "backdrop"],
+  "types": "./types/index.d.ts"
+}
