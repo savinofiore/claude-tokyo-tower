@@ -15,7 +15,9 @@ perl -ne '
     qr/child_process/, qr/["\x27]node:/,
   );
   for my $r (@rules) { if ($_ =~ $r) { print "$ARGV:$.: $_"; $bad = 1; last } }
-  if (/^\s*import\s.*\bfrom\s+["\x27]([^"\x27]+)["\x27]/ && $1 !~ m{^(claude-code|\./[\w-]+(\.js)?)$}) {
+  # Imports stay inside hooks/: the engine, its shader language, and the plugin own files
+  # (./file, ./style/file, or ../file from a style folder).
+  if (/\bfrom\s+["\x27]([^"\x27]+)["\x27]/ && $1 !~ m{^(claude-code(/shader)?|\./([\w-]+/)?[\w-]+(\.js)?|\.\./[\w-]+)$}) {
     print "$ARGV:$.: import not allowed: $_"; $bad = 1;
   }
   close ARGV if eof;

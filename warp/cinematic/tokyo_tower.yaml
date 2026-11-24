@@ -1,0 +1,28 @@
+name: Tokyo Tower
+accent: '#ff7a2f'
+cursor: '#ff7a2f'
+background: '#141418'
+foreground: '#e8e6e3'
+details: darker
+background_image:
+  path: tokyo_tower_mwusprc2_10.png
+  opacity: 60
+terminal_colors:
+  normal:
+    black: '#2a2a30'
+    red: '#e8556a'
+    green: '#7fc98f'
+    yellow: '#e8b85c'
+    blue: '#7a9bd6'
+    magenta: '#c08ad6'
+    cyan: '#6cc3c9'
+    white: '#c9c6c1'
+  bright:
+    black: '#5e5c63'
+    red: '#ff7a8a'
+    green: '#9de0aa'
+    yellow: '#ffd27a'
+    blue: '#9db8ea'
+    magenta: '#dba9ee'
+    cyan: '#94dde2'
+    white: '#f4f2ee'
