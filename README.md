@@ -36,11 +36,12 @@ motion turned on, the scene holds still in a finished pose.
   pass. Your own messages get rounded bubbles with an orange outline and a soft shadow.
 - **pixel**: the original pixel-art scene, with square bubbles and a hard pixel shadow.
 
-Install asks which one you want. To switch later, change **Style** under the plugin's options
+Install asks which one you want, and whether the cinematic style plays the film effect
+(**Film effect**, on by default; off shows the plain vector scene). To switch later, change **Style** under the plugin's options
 in `/config`, or set it in `~/.claude/settings.json`:
 
 ```json
-"pluginConfigs": { "tokyo-tower@claude-tokyo-tower": { "options": { "style": "pixel" } } }
+"pluginConfigs": { "tokyo-tower@claude-tokyo-tower": { "options": { "style": "cinematic", "film": false } } }
 ```
 
 Both are dark only.

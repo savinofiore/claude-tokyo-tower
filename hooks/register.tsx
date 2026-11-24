@@ -81,7 +81,7 @@ export const register: Register = (on, options) => {
     const level = await read($, glow)
     const alt = `${look.picture}, Tokyo Tower lit at ${Math.round(glowOf(level) * 100)}%`
     const scene = <Svg source={sceneFor(look.buildScene, level)} alt={alt} isInteractive />
-    if (look.name === 'pixel') return scene
+    if (!look.hasFilm) return scene
 
     // The Svg is the whole scene on its own; the shader adds the film look where the app plays it.
     return (

@@ -81,6 +81,16 @@ test('pixel draws the pixel-art scene alone, with no shader', { options: { style
   expect(String(svg?.props.alt)).toContain('Pixel-art')
 })
 
+test('cinematic with the film effect off draws the vector scene alone', { options: { style: 'cinematic', film: false } }, async $ => {
+  const ui = await $.ui.mount(BACKDROP)
+  const shader = await ui.find({ type: 'Shader' })
+  const svg = await ui.find({ type: 'Svg' })
+  await ui.unmount()
+
+  expect(shader === undefined).toBe(true)
+  expect(String(svg?.props.source).includes('crispEdges')).toBe(false)
+})
+
 test('a level the earlier, non-inverted version stored is declined', async ($, on) => {
   on('state.get', () => ({ value: { value: 1, version: 1 } }))
   const ui = await $.ui.mount(BACKDROP)

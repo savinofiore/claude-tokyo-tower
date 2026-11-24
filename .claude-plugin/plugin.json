@@ -1,6 +1,6 @@
 {
   "name": "tokyo-tower",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A Tokyo night behind your Claude Code chat, cinematic or pixel-art: Tokyo Tower shines bright on a fresh context and dims as the context window fills up",
   "author": {
     "name": "savinofiore",
@@ -28,6 +28,12 @@
         "cinematic",
         "pixel"
       ]
+    },
+    "film": {
+      "type": "boolean",
+      "title": "Film effect",
+      "description": "cinematic style only: play the GPU film pass (bloom, haze, grain) over the scene. Off shows the plain vector scene.",
+      "default": true
     }
   }
 }
