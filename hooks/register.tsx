@@ -30,7 +30,8 @@ const { theme, problems } = makeColors({
 
 const LOOK: ThemeSetArgs = {
   colors: theme,
-  backdrop: { scene: SCENE, glass: { blur: 10, tint: '#0b0d24', opacity: 0.55 } },
+  // A light, sky-tinted glass: the chat column melts into the night instead of standing out as a dark strip.
+  backdrop: { scene: SCENE, glass: { blur: 14, tint: '#13163e', opacity: 0.4 } },
 }
 
 // Square bubbles with a hard pixel shadow.
