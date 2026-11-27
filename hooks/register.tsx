@@ -58,12 +58,12 @@ export const register: Register = (on, options) => {
   on('session.start', async ($, e, next) => {
     const unpainted = problems.find(line => line.startsWith("Desktop won't paint"))
     if (unpainted !== undefined) $.ui.toast(unpainted)
-    const set = await $.theme.set({ ...LOOK, style: look.chat }).catch(error => {
+    // Only the desktop and mobile apps draw a theme; the terminal stays as it is, with no warning.
+    await $.theme.set({ ...LOOK, style: look.chat }).catch(error => {
       $.ui.log(String(error))
 
       return $.theme.set(LOOK)
     })
-    if (!set.isDrawn) $.ui.status(set.reason)
 
     return next(e)
   })
